@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { AxiosError } from "axios";
 import Link from "next/link";
 import { ArrowLeft, Send } from "lucide-react";
+export const dynamic = "force-dynamic";
 
 const schema = z.object({
   serviceType: z.string().min(2, "Service type is required").max(100),

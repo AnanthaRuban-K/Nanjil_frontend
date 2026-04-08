@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Zap } from "lucide-react";
 import { AxiosError } from "axios";
-
+export const dynamic = "force-dynamic";
 const schema = z.object({
   fullName: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email"),
