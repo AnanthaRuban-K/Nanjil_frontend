@@ -6,7 +6,7 @@ import { api, type Booking } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Th, Td } from "@/components/ui/Table";
 import { Pagination } from "@/components/ui/Pagination";
-
+export const dynamic = "force-dynamic";
 export default function TechnicianJobsPage() {
   const [jobs, setJobs] = useState<Booking[]>([]);
   const [page, setPage] = useState(1);

@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   IndianRupee,
 } from "lucide-react";
-
+export const dynamic = "force-dynamic";
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardSummary | null>(null);
 

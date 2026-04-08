@@ -14,7 +14,7 @@ import HowItWorks from "@/components/HowItWorks";
 import CallCTA from "@/components/CallCTA";
 import MobileStickyBar from "@/components/MobileStickyBar";
 import Image from "next/image";
-
+export const dynamic = "force-dynamic";
 /* ───── SEO Metadata ───── */
 export const metadata: Metadata = {
   title: "Electrical & Plumbing Service in Nagercoil | Nanjil MEP",

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ArrowLeft } from "lucide-react";
 import { AxiosError } from "axios";
-
+export const dynamic = "force-dynamic";
 export default function JobDetailPage() {
   const params = useParams();
   const router = useRouter();

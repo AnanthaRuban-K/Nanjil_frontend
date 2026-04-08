@@ -10,7 +10,8 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import { AuthProvider, useAuth } from "@/components/providers/AuthProvider";
+import { useAuth } from "@/lib/auth";
+
 
 export interface NavItem {
   label: string;
@@ -129,7 +130,7 @@ export default function AppShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <AuthProvider>
+    
       <div className="flex h-screen overflow-hidden bg-gray-50">
         <Sidebar
           items={navItems}
@@ -143,6 +144,6 @@ export default function AppShell({
           </main>
         </div>
       </div>
-    </AuthProvider>
+  
   );
 }

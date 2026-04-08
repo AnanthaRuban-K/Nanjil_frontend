@@ -8,6 +8,8 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Badge } from "@/components/ui/Badge";
 import { Briefcase, Clock, CheckCircle2 } from "lucide-react";
 
+
+export const dynamic = "force-dynamic";
 export default function TechnicianDashboard() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Booking[]>([]);

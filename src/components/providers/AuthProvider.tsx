@@ -14,6 +14,7 @@ export interface StoredUser {
 id: string;
 email: string;
 role: string;
+fullName: string;
 }
 
 // ── Local helpers (instead of "@/lib/auth") ─────

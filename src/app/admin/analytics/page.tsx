@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Th, Td } from "@/components/ui/Table";
 import { StatCard } from "@/components/ui/StatCard";
 import { IndianRupee, CreditCard, Smartphone } from "lucide-react";
-
+export const dynamic = "force-dynamic";
 export default function AnalyticsPage() {
   // Revenue
   const [dateFrom, setDateFrom] = useState(
