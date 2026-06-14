@@ -92,7 +92,7 @@ export default function CustomerDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -101,7 +101,7 @@ export default function CustomerDashboard() {
             <span className="text-sm text-gray-500">Total</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {loading ? "–" : total}
+            {loading ? "-" : total}
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export default function CustomerDashboard() {
             <span className="text-sm text-gray-500">Active</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {loading ? "–" : activeCount}
+            {loading ? "-" : activeCount}
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export default function CustomerDashboard() {
             <span className="text-sm text-gray-500">Completed</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">
-            {loading ? "–" : completedCount}
+            {loading ? "-" : completedCount}
           </p>
         </div>
       </div>
@@ -162,7 +162,7 @@ export default function CustomerDashboard() {
             <p className="text-gray-500 text-sm mb-4">No bookings yet</p>
             <Link href="/bookings/new">
               <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                Create your first booking →
+                Create your first booking
               </button>
             </Link>
           </div>
@@ -184,7 +184,7 @@ export default function CustomerDashboard() {
                   </p>
                   <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-400">
                     <span>{b.bookingReference}</span>
-                    <span>·</span>
+                    <span>-</span>
                     <span className="flex items-center gap-1">
                       <CalendarDays size={11} />
                       {formatDate(b.preferredDate)}

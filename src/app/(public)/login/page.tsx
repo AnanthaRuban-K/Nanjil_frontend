@@ -60,7 +60,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ── Left Panel ── */}
+      {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
         {/* Glow blobs */}
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
@@ -142,7 +142,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ── Right Panel — Form ── */}
+      {/* Right Panel - Form */}
       <div className="flex-1 flex items-center justify-center bg-gray-50/50 px-6 py-12">
         <div className="w-full max-w-[420px] space-y-8">
           {/* Mobile logo */}
@@ -158,7 +158,7 @@ export default function LoginPage() {
           {/* Heading */}
           <div className="space-y-1.5">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Welcome back 👋
+              Welcome back
             </h2>
             <p className="text-gray-500 text-sm">
               Sign in to book services & manage your account
@@ -202,7 +202,7 @@ export default function LoginPage() {
                 <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="Password"
                   className={`w-full h-12 pl-11 pr-12 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
                     focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                     ${errors.password ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
@@ -228,7 +228,7 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                   </svg>
-                  Signing in…
+                  Signing in...
                 </div>
               ) : (
                 <>

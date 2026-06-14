@@ -71,7 +71,7 @@ export default function TechnicianDashboard() {
                 <div>
                   <p className="font-medium">{j.serviceType}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {j.bookingReference} ·{" "}
+                    {j.bookingReference} -{" "}
                     {j.scheduledDate || j.preferredDate}
                   </p>
                 </div>

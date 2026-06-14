@@ -69,7 +69,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           label="Revenue Collected"
-          value={`₹${data.totalRevenueCollected.toLocaleString()}`}
+          value={`Rs. ${data.totalRevenueCollected.toLocaleString()}`}
           icon={<IndianRupee size={24} />}
           color="text-green-600"
         />

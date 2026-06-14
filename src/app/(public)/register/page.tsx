@@ -95,7 +95,7 @@ export default function RegisterPage() {
             <Input
               label="Password"
               type="password"
-              placeholder="••••••••"
+              placeholder="Password"
               error={errors.password?.message}
               {...register("password")}
             />

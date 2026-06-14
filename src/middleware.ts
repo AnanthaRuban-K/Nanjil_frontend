@@ -1,18 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Decode JWT payload (no verification — routing only)
-function getRoleFromToken(token: string): string | null {
-  try {
-    const base64 = token.split(".")[1];
-    const payload = JSON.parse(atob(base64));
-    if (payload.exp * 1000 < Date.now()) return null;
-    return payload.role;
-  } catch {
-    return null;
-  }
-}
+const PUBLIC_PATHS = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
+const AUTH_REDIRECT_PATHS = ["/login", "/register", "/forgot-password"];
 
-function roleRedirect(role: string): string {
+function getRoleRedirect(role: string | null): string {
   switch (role) {
     case "ADMIN":
       return "/admin/dashboard";
@@ -23,51 +14,37 @@ function roleRedirect(role: string): string {
   }
 }
 
-const PUBLIC_PATHS = ["/", "/login", "/register"];
+function getRoleFromToken(token?: string): string | null {
+  if (!token) return null;
+
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const decoded = JSON.parse(atob(normalized)) as { role?: unknown };
+    return typeof decoded.role === "string" ? decoded.role : null;
+  } catch {
+    return null;
+  }
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
-  const role = token ? getRoleFromToken(token) : null;
+  const hasSession = Boolean(token);
 
-  // ── Public routes ────────────────────────────────
   if (PUBLIC_PATHS.includes(pathname)) {
-    // Already logged in → send to dashboard
-    if (role) {
+    if (hasSession && AUTH_REDIRECT_PATHS.includes(pathname)) {
       return NextResponse.redirect(
-        new URL(roleRedirect(role), request.url)
+        new URL(getRoleRedirect(getRoleFromToken(token)), request.url)
       );
     }
     return NextResponse.next();
   }
 
-  // ── No token → login ────────────────────────────
-  if (!role) {
+  if (!hasSession) {
     return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  // ── Role-path checks ────────────────────────────
-  if (pathname.startsWith("/admin") && role !== "ADMIN") {
-    return NextResponse.redirect(
-      new URL(roleRedirect(role), request.url)
-    );
-  }
-
-  if (pathname.startsWith("/technician") && role !== "TECHNICIAN") {
-    return NextResponse.redirect(
-      new URL(roleRedirect(role), request.url)
-    );
-  }
-
-  // Customer paths (/dashboard, /bookings)
-  if (
-    (pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/bookings")) &&
-    role !== "CUSTOMER"
-  ) {
-    return NextResponse.redirect(
-      new URL(roleRedirect(role), request.url)
-    );
   }
 
   return NextResponse.next();
@@ -78,6 +55,8 @@ export const config = {
     "/",
     "/login",
     "/register",
+    "/forgot-password",
+    "/reset-password",
     "/dashboard/:path*",
     "/bookings/:path*",
     "/admin/:path*",

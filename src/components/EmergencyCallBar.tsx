@@ -17,7 +17,7 @@ export default function EmergencyCallBar() {
         <Zap size={16} className="hidden sm:block shrink-0" />
 
         <span className="font-medium truncate">
-          ⚡ Emergency Electrical or Plumbing Issue?
+          Emergency Electrical or Plumbing Issue?
         </span>
 
         <Link
@@ -26,7 +26,7 @@ export default function EmergencyCallBar() {
           aria-label="Call for emergency service"
         >
           <Phone size={14} />
-          Call Now
+          Call Support
         </Link>
       </div>
     </div>

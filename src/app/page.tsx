@@ -15,7 +15,7 @@ import CallCTA from "@/components/CallCTA";
 import MobileStickyBar from "@/components/MobileStickyBar";
 import Image from "next/image";
 export const dynamic = "force-dynamic";
-/* ───── SEO Metadata ───── */
+/* SEO Metadata */
 export const metadata: Metadata = {
   title: "Electrical & Plumbing Service in Nagercoil | Nanjil MEP",
   description:
@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   },
 };
 
-/* ───── Page ───── */
+/* Page */
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#F5F7FA] pb-20 md:pb-0">
-      {/* ── Sticky Emergency Bar ── */}
+      {/* Sticky Emergency Bar */}
       <EmergencyCallBar />
 
-      {/* ── Header ── */}
+      {/* Header */}
       <header className="border-b border-gray-100 bg-white shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
           {/* Logo */}
@@ -87,22 +87,22 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <LandingHero />
 
-      {/* ── Trust Badges ── */}
+      {/* Trust Badges */}
       <TrustSection />
 
-      {/* ── Services ── */}
+      {/* Services */}
       <ServiceGrid />
 
-      {/* ── How It Works ── */}
+      {/* How It Works */}
       <HowItWorks />
 
-      {/* ── CTA ── */}
+      {/* CTA */}
       <CallCTA />
 
-      {/* ── Footer ── */}
+      {/* Footer */}
       <footer className="bg-[#1E2A38] text-gray-400">
         <div className="mx-auto max-w-6xl px-4 py-12">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -165,21 +165,21 @@ export default function LandingPage() {
             <div>
               <h4 className="mb-4 font-semibold text-white">Contact Us</h4>
               <ul className="space-y-2 text-sm">
-                <li>📍 Nagercoil, Tamil Nadu</li>
-                <li>📞 {CONTACT_CONFIG.phoneDisplay}</li>
-                <li>⏰ Mon–Sat, 8 AM – 8 PM</li>
+                <li>Location: Nagercoil, Tamil Nadu</li>
+                <li>Phone: {CONTACT_CONFIG.phoneDisplay}</li>
+                <li>Hours: Mon-Sat, 8 AM - 8 PM</li>
               </ul>
             </div>
           </div>
 
           <div className="mt-10 border-t border-gray-700 pt-6 text-center text-sm">
-            © {new Date().getFullYear()} {CONTACT_CONFIG.companyName}. All
+            Copyright {new Date().getFullYear()} {CONTACT_CONFIG.companyName}. All
             rights reserved.
           </div>
         </div>
       </footer>
 
-      {/* ── Mobile Sticky Booking Bar ── */}
+      {/* Mobile Sticky Booking Bar */}
       <MobileStickyBar />
     </div>
   );

@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { api, type AuthUser } from "./api";
 
-// ── Token helpers ──────────────────────────────────
+// Token helpers
 interface TokenPayload {
   sub: string;
   role: string;
@@ -20,25 +20,7 @@ interface TokenPayload {
   exp: number;
 }
 
-function decodeToken(token: string): TokenPayload | null {
-  try {
-    const base64 = token.split(".")[1];
-    return JSON.parse(atob(base64));
-  } catch {
-    return null;
-  }
-}
-
-function setTokenCookie(token: string) {
-  document.cookie = `token=${token}; path=/; max-age=86400; SameSite=Lax`;
-}
-
-function clearTokenCookie() {
-  document.cookie =
-    "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-}
-
-// ── Context shape ──────────────────────────────────
+// Context shape
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
@@ -72,7 +54,7 @@ export function getRoleRedirect(role: string): string {
   }
 }
 
-// ── Provider ───────────────────────────────────────
+// Provider
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -80,33 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-
-    if (storedToken && storedUser) {
-      const decoded = decodeToken(storedToken);
-      if (decoded && decoded.exp * 1000 > Date.now()) {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } else {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        clearTokenCookie();
-      }
-    }
-    setIsLoading(false);
+    api
+      .get("/auth/me")
+      .then((res) => setUser(res.data.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const login = useCallback(
     async (email: string, password: string): Promise<string> => {
       const res = await api.post("/auth/login", { email, password });
-      const { token: t, user: u } = res.data.data;
+      const { user: u } = res.data.data;
 
-      setToken(t);
+      setToken(null);
       setUser(u);
-      localStorage.setItem("token", t);
-      localStorage.setItem("user", JSON.stringify(u));
-      setTokenCookie(t);
 
       return u.role;
     },
@@ -121,23 +90,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password: string;
     }) => {
       const res = await api.post("/auth/register", data);
-      const { token: t, user: u } = res.data.data;
+      const { user: u } = res.data.data;
 
-      setToken(t);
+      setToken(null);
       setUser(u);
-      localStorage.setItem("token", t);
-      localStorage.setItem("user", JSON.stringify(u));
-      setTokenCookie(t);
     },
     []
   );
 
   const logout = useCallback(() => {
+    api.post("/auth/logout").catch(() => undefined);
     setToken(null);
     setUser(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    clearTokenCookie();
     router.push("/login");
   }, [router]);
 

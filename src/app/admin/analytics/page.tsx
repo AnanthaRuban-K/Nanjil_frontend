@@ -54,7 +54,7 @@ export default function AnalyticsPage() {
     <div className="space-y-8">
       <h1 className="text-2xl font-bold">Analytics</h1>
 
-      {/* ── Revenue Section ─────────────────── */}
+      {/* Revenue Section */}
       <section>
         <h2 className="text-lg font-semibold mb-3">Revenue</h2>
         <div className="flex flex-wrap gap-3 items-end mb-4">
@@ -79,19 +79,19 @@ export default function AnalyticsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               label="Total Revenue"
-              value={`₹${revenue.totalRevenue.toLocaleString()}`}
+              value={`Rs. ${revenue.totalRevenue.toLocaleString()}`}
               icon={<IndianRupee size={24} />}
               color="text-green-600"
             />
             <StatCard
               label="Cash"
-              value={`₹${revenue.cashTotal.toLocaleString()}`}
+              value={`Rs. ${revenue.cashTotal.toLocaleString()}`}
               icon={<CreditCard size={24} />}
               color="text-teal-500"
             />
             <StatCard
               label="UPI"
-              value={`₹${revenue.upiTotal.toLocaleString()}`}
+              value={`Rs. ${revenue.upiTotal.toLocaleString()}`}
               icon={<Smartphone size={24} />}
               color="text-indigo-500"
             />
@@ -103,7 +103,7 @@ export default function AnalyticsPage() {
         )}
       </section>
 
-      {/* ── Booking Breakdown ───────────────── */}
+      {/* Booking Breakdown */}
       {bookingAnalytics && (
         <>
           <section>

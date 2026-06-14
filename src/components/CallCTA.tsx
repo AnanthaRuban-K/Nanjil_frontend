@@ -28,7 +28,7 @@ export default function CallCTA() {
             className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#F57C00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:bg-[#e06800] sm:w-auto"
           >
             <Phone size={22} />
-            Call Now
+            Call Support
           </Link>
 
           <Link
@@ -43,7 +43,7 @@ export default function CallCTA() {
         </div>
 
         <p className="mt-6 text-sm text-blue-300">
-          Available Mon–Sat, 8 AM – 8 PM &nbsp;|&nbsp; Emergency services 24/7
+          Available Mon-Sat, 8 AM - 8 PM &nbsp;|&nbsp; Emergency services 24/7
         </p>
       </div>
     </section>

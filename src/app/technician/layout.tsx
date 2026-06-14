@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardShell, type NavItem } from "@/components/DashboardShell";
+import { RoleGuard } from "@/components/RoleGuard";
 import { LayoutDashboard, Briefcase } from "lucide-react";
 
 const NAV: NavItem[] = [
@@ -14,8 +15,10 @@ export default function TechnicianLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardShell navItems={NAV} title="Technician Panel">
-      {children}
-    </DashboardShell>
+    <RoleGuard allowedRole="TECHNICIAN">
+      <DashboardShell navItems={NAV} title="Technician Panel">
+        {children}
+      </DashboardShell>
+    </RoleGuard>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { api, type Booking } from "@/lib/api";
+import { api, type Booking, type Technician } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Table, Thead, Th, Td } from "@/components/ui/Table";
@@ -19,17 +19,28 @@ const STATUS_OPTIONS = [
   { value: "COMPLETED", label: "Completed" },
   { value: "CANCELLED", label: "Cancelled" },
 ];
+
+const PAYMENT_STATUS_OPTIONS = [
+  { value: "", label: "All Payments" },
+  { value: "UNPAID", label: "Unpaid" },
+  { value: "PAYMENT_SUBMITTED", label: "Submitted" },
+  { value: "PAID", label: "Paid" },
+  { value: "PAYMENT_REJECTED", label: "Rejected" },
+];
 export const dynamic = "force-dynamic";
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
   const limit = 10;
 
   // Modal state
   const [assignOpen, setAssignOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const [amountOpen, setAmountOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [selected, setSelected] = useState<Booking | null>(null);
   const [modalError, setModalError] = useState("");
@@ -44,6 +55,7 @@ export default function AdminBookingsPage() {
   const [payMode, setPayMode] = useState("CASH");
   const [upiRef, setUpiRef] = useState("");
   const [payDate, setPayDate] = useState("");
+  const [serviceAmount, setServiceAmount] = useState("");
 
   // Status form
   const [newStatus, setNewStatus] = useState("");
@@ -51,18 +63,27 @@ export default function AdminBookingsPage() {
   const load = useCallback(async () => {
     const params: Record<string, unknown> = { page, limit };
     if (statusFilter) params.status = statusFilter;
+    if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
     const res = await api.get("/admin/bookings", { params });
     setBookings(res.data.data);
     setTotal(res.data.meta.total);
-  }, [page, statusFilter]);
+  }, [page, statusFilter, paymentStatusFilter]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  useEffect(() => {
+    api
+      .get("/admin/technicians")
+      .then((res) => setTechnicians(res.data.data))
+      .catch(() => setTechnicians([]));
+  }, []);
+
   const resetModals = () => {
     setAssignOpen(false);
     setPaymentOpen(false);
+    setAmountOpen(false);
     setStatusOpen(false);
     setSelected(null);
     setModalError("");
@@ -73,6 +94,7 @@ export default function AdminBookingsPage() {
     setPayMode("CASH");
     setUpiRef("");
     setPayDate("");
+    setServiceAmount("");
     setNewStatus("");
   };
 
@@ -102,7 +124,7 @@ export default function AdminBookingsPage() {
     setModalLoading(true);
     try {
       await api.post(`/admin/bookings/${selected.id}/payment`, {
-        amount: parseFloat(amount),
+        ...(amount ? { amount: parseFloat(amount) } : {}),
         paymentMode: payMode,
         ...(payMode === "UPI" ? { upiReference: upiRef } : {}),
         paymentDate: payDate,
@@ -115,6 +137,40 @@ export default function AdminBookingsPage() {
       else setModalError("Something went wrong");
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const handleServiceAmount = async () => {
+    if (!selected) return;
+    setModalError("");
+    setModalLoading(true);
+    try {
+      await api.patch(`/admin/bookings/${selected.id}/service-amount`, {
+        serviceAmount: parseFloat(serviceAmount),
+      });
+      resetModals();
+      load();
+    } catch (err) {
+      if (err instanceof AxiosError)
+        setModalError(err.response?.data?.message || "Failed");
+      else setModalError("Something went wrong");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleRejectPayment = async (booking: Booking) => {
+    if (!window.confirm("Reject this payment submission?")) return;
+    setModalError("");
+    try {
+      await api.patch(`/admin/bookings/${booking.id}/payment/reject`, {
+        reason: "Unable to verify UPI payment. Please resubmit the correct reference.",
+      });
+      load();
+    } catch (err) {
+      if (err instanceof AxiosError)
+        window.alert(err.response?.data?.message || "Failed");
+      else window.alert("Something went wrong");
     }
   };
 
@@ -182,15 +238,42 @@ export default function AdminBookingsPage() {
         },
       });
     }
-    if (b.status === "COMPLETED" && b.paymentStatus === "UNPAID") {
+    if (
+      b.status === "COMPLETED" &&
+      ["UNPAID", "PAYMENT_SUBMITTED", "PAYMENT_REJECTED"].includes(
+        b.paymentStatus
+      )
+    ) {
       actions.push({
-        label: "Record Payment",
+        label: b.serviceAmount ? "Edit Amount" : "Set Amount",
+        variant: "secondary",
+        onClick: () => {
+          setSelected(b);
+          setServiceAmount(b.serviceAmount ?? "");
+          setAmountOpen(true);
+        },
+      });
+      actions.push({
+        label:
+          b.paymentStatus === "PAYMENT_SUBMITTED"
+            ? "Verify Payment"
+            : "Record Payment",
         variant: "primary",
         onClick: () => {
           setSelected(b);
+          setPayMode(b.submittedUpiReference ? "UPI" : "CASH");
+          setUpiRef(b.submittedUpiReference ?? "");
+          setAmount(b.serviceAmount ?? "");
           setPayDate(new Date().toISOString().split("T")[0]);
           setPaymentOpen(true);
         },
+      });
+    }
+    if (b.paymentStatus === "PAYMENT_SUBMITTED") {
+      actions.push({
+        label: "Reject",
+        variant: "danger",
+        onClick: () => handleRejectPayment(b),
       });
     }
     return actions;
@@ -201,7 +284,7 @@ export default function AdminBookingsPage() {
       <h1 className="text-2xl font-bold mb-6">Manage Bookings</h1>
 
       {/* Filter */}
-      <div className="mb-4 flex gap-3 items-end">
+      <div className="mb-4 flex flex-wrap gap-3 items-end">
         <div className="w-48">
           <Select
             label="Filter by Status"
@@ -209,6 +292,17 @@ export default function AdminBookingsPage() {
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
+        <div className="w-48">
+          <Select
+            label="Filter by Payment"
+            options={PAYMENT_STATUS_OPTIONS}
+            value={paymentStatusFilter}
+            onChange={(e) => {
+              setPaymentStatusFilter(e.target.value);
               setPage(1);
             }}
           />
@@ -222,6 +316,7 @@ export default function AdminBookingsPage() {
             <Th>Service</Th>
             <Th>Date</Th>
             <Th>Status</Th>
+            <Th>Amount</Th>
             <Th>Payment</Th>
             <Th className="text-right">Actions</Th>
           </tr>
@@ -235,6 +330,7 @@ export default function AdminBookingsPage() {
               <Td>
                 <Badge status={b.status} />
               </Td>
+              <Td>{b.serviceAmount ? `Rs. ${b.serviceAmount}` : "-"}</Td>
               <Td>
                 <Badge status={b.paymentStatus} />
               </Td>
@@ -270,9 +366,21 @@ export default function AdminBookingsPage() {
           </div>
         )}
         <div className="space-y-4">
-          <Input
-            label="Technician ID (UUID)"
-            placeholder="Paste technician UUID"
+          <Select
+            label="Technician"
+            options={[
+              {
+                value: "",
+                label:
+                  technicians.length > 0
+                    ? "Select technician"
+                    : "No active technicians",
+              },
+              ...technicians.map((tech) => ({
+                value: tech.id,
+                label: `${tech.fullName} - ${tech.phone}`,
+              })),
+            ]}
             value={techId}
             onChange={(e) => setTechId(e.target.value)}
           />
@@ -285,9 +393,40 @@ export default function AdminBookingsPage() {
           <Button
             onClick={handleAssign}
             loading={modalLoading}
+            disabled={!techId}
             className="w-full"
           >
             Assign & Confirm
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Record Payment Modal */}
+      <Modal
+        open={amountOpen}
+        onClose={resetModals}
+        title="Service Amount"
+      >
+        {modalError && (
+          <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+            {modalError}
+          </div>
+        )}
+        <div className="space-y-4">
+          <Input
+            label="Service Amount (Rs.)"
+            type="number"
+            step="0.01"
+            value={serviceAmount}
+            onChange={(e) => setServiceAmount(e.target.value)}
+          />
+          <Button
+            onClick={handleServiceAmount}
+            loading={modalLoading}
+            disabled={!serviceAmount}
+            className="w-full"
+          >
+            Save Amount
           </Button>
         </div>
       </Modal>
@@ -305,7 +444,7 @@ export default function AdminBookingsPage() {
         )}
         <div className="space-y-4">
           <Input
-            label="Amount (₹)"
+            label="Amount (Rs.)"
             type="number"
             step="0.01"
             value={amount}

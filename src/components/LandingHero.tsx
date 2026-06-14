@@ -40,7 +40,7 @@ export default function LandingHero() {
             aria-label="Call now for service"
           >
             <Phone size={22} />
-            Call Now
+            Call Support
           </Link>
 
           <Link
@@ -65,7 +65,7 @@ export default function LandingHero() {
         </div>
 
         <p className="mt-6 text-sm text-blue-200">
-          ⭐ Rated 4.8/5 by 500+ customers
+          Rated 4.8/5 by 500+ customers
         </p>
       </div>
     </section>

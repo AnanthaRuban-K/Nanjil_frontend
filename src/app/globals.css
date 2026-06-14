@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/* app/globals.css  — add this at the top */
+/* app/globals.css - add this at the top */
 html {
   scroll-behavior: smooth;
 }

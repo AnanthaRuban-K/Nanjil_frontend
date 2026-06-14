@@ -1,6 +1,7 @@
 "use client";
 
 import { DashboardShell, type NavItem } from "@/components/DashboardShell";
+import { RoleGuard } from "@/components/RoleGuard";
 import { LayoutDashboard, BookOpen, PlusCircle } from "lucide-react";
 
 const NAV: NavItem[] = [
@@ -15,8 +16,10 @@ export default function CustomerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DashboardShell navItems={NAV} title="Customer Panel">
-      {children}
-    </DashboardShell>
+    <RoleGuard allowedRole="CUSTOMER">
+      <DashboardShell navItems={NAV} title="Customer Panel">
+        {children}
+      </DashboardShell>
+    </RoleGuard>
   );
 }

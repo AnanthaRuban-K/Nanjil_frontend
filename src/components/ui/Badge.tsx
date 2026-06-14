@@ -6,8 +6,12 @@ const STYLES: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-800",
   PAID: "bg-green-100 text-green-800",
   UNPAID: "bg-orange-100 text-orange-800",
+  PAYMENT_SUBMITTED: "bg-blue-100 text-blue-800",
+  PAYMENT_REJECTED: "bg-red-100 text-red-800",
   CASH: "bg-teal-100 text-teal-800",
   UPI: "bg-indigo-100 text-indigo-800",
+  ACTIVE: "bg-green-100 text-green-800",
+  INACTIVE: "bg-gray-100 text-gray-800",
 };
 
 export function Badge({ status }: { status: string }) {
