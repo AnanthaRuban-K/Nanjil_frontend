@@ -32,7 +32,7 @@ interface AuthContextType {
     phone: string;
     password: string;
   }) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -98,11 +98,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const logout = useCallback(() => {
-    api.post("/auth/logout").catch(() => undefined);
+  const logout = useCallback(async () => {
+    try {
+      await api.post("/auth/logout", undefined, { timeout: 2500 });
+    } catch {
+      // Local logout should still work if the API is offline or the request is interrupted.
+    }
+
     setToken(null);
     setUser(null);
-    router.push("/login");
+    router.replace("/login");
   }, [router]);
 
   return (

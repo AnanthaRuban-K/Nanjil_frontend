@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/lib/auth";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Zap } from "lucide-react";
 import { AxiosError } from "axios";
 export const dynamic = "force-dynamic";
 const schema = z.object({
@@ -55,17 +55,26 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#F4F8FB] px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Zap size={28} className="text-blue-600" />
-            <span className="text-2xl font-bold">Nanjil MEP</span>
-          </div>
-          <p className="text-gray-500">Create a customer account</p>
+          <Image
+            src="/Nanjil.png"
+            alt="Nanjil MEP Service"
+            width={170}
+            height={76}
+            priority
+            className="mx-auto mb-3 h-16 w-auto object-contain"
+          />
+          <h1 className="text-2xl font-bold text-[#12355B]">
+            Create customer account
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Book and track electrical or plumbing services
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="rounded-lg border border-[#D7E4EE] bg-white p-6 shadow-sm">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
               {error}
@@ -106,10 +115,7 @@ export default function RegisterPage() {
 
           <p className="mt-4 text-sm text-center text-gray-500">
             Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-blue-600 hover:underline font-medium"
-            >
+            <Link href="/login" className="font-medium text-[#0E7892] hover:text-[#12355B]">
               Sign in
             </Link>
           </p>

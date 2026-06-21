@@ -2,7 +2,6 @@
 
 import { Metadata } from "next";
 import Link from "next/link";
-import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { CONTACT_CONFIG } from "@/config/contact";
 
@@ -108,13 +107,14 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {/* Brand */}
             <div>
-              <div className="mb-4 flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F2F6B]">
-                  <Zap size={18} className="text-[#3CC3D6]" />
-                </div>
-                <span className="text-lg font-extrabold text-white">
-                  Nanjil <span className="text-[#F57C00]">MEP</span>
-                </span>
+              <div className="mb-4 inline-flex rounded-md bg-white px-3 py-2">
+                <Image
+                  src="/Nanjil.png"
+                  alt="Nanjil MEP Service"
+                  width={150}
+                  height={68}
+                  className="h-12 w-auto object-contain"
+                />
               </div>
               <p className="text-sm leading-relaxed">
                 Professional electrical and plumbing services in Nagercoil.

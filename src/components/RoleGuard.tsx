@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { BrandedLoading } from "@/components/BrandedLoading";
 import { getRoleRedirect, useAuth } from "@/lib/auth";
 
 export function RoleGuard({
@@ -28,11 +29,7 @@ export function RoleGuard({
   }, [allowedRole, isLoading, router, user]);
 
   if (isLoading || !user || user.role !== allowedRole) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-      </div>
-    );
+    return <BrandedLoading message="Checking your session" />;
   }
 
   return <>{children}</>;

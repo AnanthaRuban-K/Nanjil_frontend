@@ -3,17 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth, getRoleRedirect } from "@/lib/auth";
 import {
-  Zap,
   ArrowRight,
   Mail,
   Lock,
   Eye,
   EyeOff,
+  Zap,
   Droplets,
   Wrench,
   Star,
@@ -61,7 +62,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0F2F57] via-[#12355B] to-[#071D35]">
         {/* Glow blobs */}
         <div className="absolute -top-20 -right-20 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-10 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
@@ -69,14 +70,15 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col justify-between h-full p-10 text-white">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/25">
-              <Zap size={20} className="text-white" />
-            </div>
-            <div>
-              <span className="text-lg font-bold">Nanjil MEP</span>
-              <p className="text-[10px] text-blue-300/60 uppercase tracking-widest">
-                Electrical & Plumbing Services
-              </p>
+            <div className="rounded-lg bg-white px-3 py-2 shadow-lg shadow-black/10">
+              <Image
+                src="/Nanjil.png"
+                alt="Nanjil MEP Service"
+                width={156}
+                height={70}
+                priority
+                className="h-11 w-auto object-contain"
+              />
             </div>
           </div>
 
@@ -86,9 +88,9 @@ export default function LoginPage() {
             <div className="space-y-3">
               <h1 className="text-3xl xl:text-4xl font-extrabold leading-tight">
                 Expert Electrical &{" "}
-                <span className="text-cyan-400">Plumbing</span> Services
+                <span className="text-[#37B8D8]">Plumbing</span> Services
               </h1>
-              <p className="text-blue-100/60 text-sm leading-relaxed">
+              <p className="text-white/65 text-sm leading-relaxed">
                 Book verified professionals for repairs, installation & maintenance. Transparent pricing. Zero hidden charges.
               </p>
             </div>
@@ -96,8 +98,8 @@ export default function LoginPage() {
             {/* Service icons */}
             <div className="flex gap-4">
               {[
-                { icon: Zap, label: "Electrical", color: "bg-yellow-500" },
-                { icon: Droplets, label: "Plumbing", color: "bg-cyan-500" },
+                { icon: Zap, label: "Electrical", color: "bg-[#F7941D]" },
+                { icon: Droplets, label: "Plumbing", color: "bg-[#37B8D8]" },
                 { icon: Wrench, label: "Maintenance", color: "bg-emerald-500" },
               ].map((s) => (
                 <div key={s.label} className="flex flex-col items-center gap-2">
@@ -146,13 +148,15 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center bg-gray-50/50 px-6 py-12">
         <div className="w-full max-w-[420px] space-y-8">
           {/* Mobile logo */}
-          <div className="lg:hidden text-center space-y-1">
-            <div className="inline-flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center">
-                <Zap size={20} className="text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">Nanjil MEP</span>
-            </div>
+          <div className="lg:hidden text-center">
+            <Image
+              src="/Nanjil.png"
+              alt="Nanjil MEP Service"
+              width={156}
+              height={70}
+              priority
+              className="mx-auto h-14 w-auto object-contain"
+            />
           </div>
 
           {/* Heading */}
@@ -183,7 +187,7 @@ export default function LoginPage() {
                   type="email"
                   placeholder="you@example.com"
                   className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
-                    focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                    focus:ring-2 focus:ring-[#37B8D8]/20 focus:border-[#37B8D8]
                     ${errors.email ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
                   {...register("email")}
                 />
@@ -194,7 +198,7 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-medium text-gray-700">Password</label>
-                <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700">
+                <Link href="/forgot-password" className="text-xs text-[#0E7892] hover:text-[#12355B]">
                   Forgot?
                 </Link>
               </div>
@@ -204,7 +208,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   className={`w-full h-12 pl-11 pr-12 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
-                    focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                    focus:ring-2 focus:ring-[#37B8D8]/20 focus:border-[#37B8D8]
                     ${errors.password ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
                   {...register("password")}
                 />
@@ -218,8 +222,8 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl
-                transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-blue-600/25
+              className="w-full h-12 bg-[#F7941D] hover:bg-[#e8820f] text-white font-semibold text-sm rounded-xl
+                transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20
                 flex items-center justify-center gap-2 group"
             >
               {loading ? (
@@ -241,7 +245,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500">
             New here?{" "}
-            <Link href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link href="/register" className="text-[#0E7892] hover:text-[#12355B] font-semibold">
               Create account
             </Link>
           </p>

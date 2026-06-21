@@ -2,9 +2,10 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { Menu, X, LogOut, Zap } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 
 export interface NavItem {
   label: string;
@@ -24,14 +25,27 @@ export function DashboardShell({ children, navItems, title }: Props) {
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F4F8FB]">
       {/* Mobile header */}
-      <div className="lg:hidden flex items-center justify-between bg-gray-900 text-white px-4 py-3">
-        <div className="flex items-center gap-2">
-          <Zap size={20} className="text-blue-400" />
-          <span className="font-bold">{title}</span>
+      <div className="lg:hidden flex items-center justify-between border-b border-[#D7E4EE] bg-white px-4 py-3 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <Image
+            src="/Nanjil.png"
+            alt="Nanjil MEP Service"
+            width={122}
+            height={54}
+            priority
+            className="h-10 w-auto object-contain"
+          />
+          <span className="hidden text-sm font-semibold text-[#12355B] sm:inline">
+            {title}
+          </span>
         </div>
-        <button onClick={() => setOpen(!open)}>
+        <button
+          onClick={() => setOpen(!open)}
+          className="rounded-lg border border-[#D7E4EE] p-2 text-[#12355B]"
+          aria-label={open ? "Close menu" : "Open menu"}
+        >
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -39,17 +53,34 @@ export function DashboardShell({ children, navItems, title }: Props) {
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-900 text-white
+          className={`fixed inset-y-0 left-0 z-40 w-72 bg-[#0F2F57] text-white shadow-2xl shadow-[#0F2F57]/20
             transform transition-transform duration-200 lg:translate-x-0 lg:static
             ${open ? "translate-x-0" : "-translate-x-full"}`}
         >
-          <div className="p-5 border-b border-gray-700 hidden lg:block">
-            <div className="flex items-center gap-2">
-              <Zap size={22} className="text-blue-400" />
-              <span className="text-lg font-bold">Nanjil MEP</span>
+          <div className="border-b border-white/10 p-5">
+            <div className="flex items-center justify-between gap-3">
+              <Image
+                src="/Nanjil.png"
+                alt="Nanjil MEP Service"
+                width={158}
+                height={70}
+                priority
+                className="h-12 w-auto rounded-md bg-white object-contain px-2 py-1"
+              />
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-lg p-2 text-white/70 hover:bg-white/10 lg:hidden"
+                aria-label="Close menu"
+              >
+                <X size={20} />
+              </button>
             </div>
-            <p className="text-xs text-gray-400 mt-2">{user?.fullName}</p>
-            <p className="text-xs text-gray-500">{user?.role}</p>
+            <p className="mt-4 truncate text-sm font-semibold text-white">
+              {user?.fullName}
+            </p>
+            <p className="mt-0.5 text-xs uppercase tracking-wide text-[#37B8D8]">
+              {user?.role}
+            </p>
           </div>
 
           <nav className="mt-4 space-y-1 px-3">
@@ -58,11 +89,11 @@ export function DashboardShell({ children, navItems, title }: Props) {
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors
                   ${
                     pathname === item.href
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-300 hover:bg-gray-800"
+                      ? "bg-[#F7941D] text-white shadow-sm"
+                      : "text-white/75 hover:bg-white/10 hover:text-white"
                   }`}
               >
                 {item.icon}
@@ -74,8 +105,8 @@ export function DashboardShell({ children, navItems, title }: Props) {
           <div className="absolute bottom-4 left-0 right-0 px-3">
             <button
               onClick={logout}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                text-gray-300 hover:bg-gray-800 w-full transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm
+                text-white/75 transition-colors hover:bg-white/10 hover:text-white"
             >
               <LogOut size={18} />
               Logout
@@ -92,7 +123,7 @@ export function DashboardShell({ children, navItems, title }: Props) {
         )}
 
         {/* Main */}
-        <main className="flex-1 min-h-screen p-4 lg:p-8">{children}</main>
+        <main className="min-h-screen flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );
