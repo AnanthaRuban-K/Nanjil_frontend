@@ -19,6 +19,13 @@ export interface AuthUser {
   updatedAt: string;
 }
 
+export interface CustomerContact {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
 export interface Booking {
   id: string;
   bookingReference: string;
@@ -37,6 +44,7 @@ export interface Booking {
   paymentRejectedReason: string | null;
   createdAt: string;
   updatedAt: string;
+  customer?: CustomerContact | null;
 }
 
 export type Technician = AuthUser;

@@ -33,6 +33,8 @@ export default function TechnicianJobsPage() {
         <Thead>
           <tr>
             <Th>Reference</Th>
+            <Th>Customer</Th>
+            <Th>Phone</Th>
             <Th>Service</Th>
             <Th>Scheduled</Th>
             <Th>Status</Th>
@@ -43,6 +45,19 @@ export default function TechnicianJobsPage() {
           {jobs.map((j) => (
             <tr key={j.id} className="hover:bg-gray-50">
               <Td className="font-medium">{j.bookingReference}</Td>
+              <Td>{j.customer?.fullName ?? "-"}</Td>
+              <Td>
+                {j.customer?.phone ? (
+                  <a
+                    href={`tel:${j.customer.phone}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {j.customer.phone}
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </Td>
               <Td>{j.serviceType}</Td>
               <Td>{j.scheduledDate || j.preferredDate}</Td>
               <Td>

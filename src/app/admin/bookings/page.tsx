@@ -35,6 +35,7 @@ export default function AdminBookingsPage() {
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
   const limit = 10;
 
   // Modal state
@@ -42,6 +43,7 @@ export default function AdminBookingsPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [amountOpen, setAmountOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [selected, setSelected] = useState<Booking | null>(null);
   const [modalError, setModalError] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
@@ -64,10 +66,11 @@ export default function AdminBookingsPage() {
     const params: Record<string, unknown> = { page, limit };
     if (statusFilter) params.status = statusFilter;
     if (paymentStatusFilter) params.paymentStatus = paymentStatusFilter;
+    if (search.trim()) params.search = search.trim();
     const res = await api.get("/admin/bookings", { params });
     setBookings(res.data.data);
     setTotal(res.data.meta.total);
-  }, [page, statusFilter, paymentStatusFilter]);
+  }, [page, statusFilter, paymentStatusFilter, search]);
 
   useEffect(() => {
     load();
@@ -85,6 +88,7 @@ export default function AdminBookingsPage() {
     setPaymentOpen(false);
     setAmountOpen(false);
     setStatusOpen(false);
+    setDetailsOpen(false);
     setSelected(null);
     setModalError("");
     setModalLoading(false);
@@ -197,6 +201,15 @@ export default function AdminBookingsPage() {
   const getActions = (b: Booking) => {
     const actions: { label: string; onClick: () => void; variant: "primary" | "secondary" | "danger" }[] = [];
 
+    actions.push({
+      label: "View",
+      variant: "secondary",
+      onClick: () => {
+        setSelected(b);
+        setDetailsOpen(true);
+      },
+    });
+
     if (b.status === "PENDING") {
       actions.push({
         label: "Assign",
@@ -307,16 +320,28 @@ export default function AdminBookingsPage() {
             }}
           />
         </div>
+        <div className="w-72">
+          <Input
+            label="Search"
+            placeholder="Name, phone, email, ref, address"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
+        </div>
       </div>
 
       <Table>
         <Thead>
           <tr>
             <Th>Ref</Th>
+            <Th>Customer</Th>
+            <Th>Phone</Th>
             <Th>Service</Th>
             <Th>Date</Th>
             <Th>Status</Th>
-            <Th>Amount</Th>
             <Th>Payment</Th>
             <Th className="text-right">Actions</Th>
           </tr>
@@ -325,12 +350,24 @@ export default function AdminBookingsPage() {
           {bookings.map((b) => (
             <tr key={b.id} className="hover:bg-gray-50">
               <Td className="font-medium">{b.bookingReference}</Td>
+              <Td>{b.customer?.fullName ?? "-"}</Td>
+              <Td>
+                {b.customer?.phone ? (
+                  <a
+                    href={`tel:${b.customer.phone}`}
+                    className="text-blue-600 hover:underline"
+                  >
+                    {b.customer.phone}
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </Td>
               <Td>{b.serviceType}</Td>
               <Td>{b.preferredDate}</Td>
               <Td>
                 <Badge status={b.status} />
               </Td>
-              <Td>{b.serviceAmount ? `Rs. ${b.serviceAmount}` : "-"}</Td>
               <Td>
                 <Badge status={b.paymentStatus} />
               </Td>
@@ -353,6 +390,37 @@ export default function AdminBookingsPage() {
         </tbody>
       </Table>
       <Pagination page={page} limit={limit} total={total} onChange={setPage} />
+
+      <Modal
+        open={detailsOpen}
+        onClose={resetModals}
+        title="Booking Details"
+      >
+        {selected && (
+          <dl className="space-y-3">
+            {[
+              ["Reference", selected.bookingReference],
+              ["Customer", selected.customer?.fullName ?? "-"],
+              ["Phone", selected.customer?.phone ?? "-"],
+              ["Email", selected.customer?.email ?? "-"],
+              ["Service", selected.serviceType],
+              ["Preferred Date", selected.preferredDate],
+              ["Scheduled Date", selected.scheduledDate ?? "-"],
+              ["Address", selected.serviceAddress],
+              ["Issue", selected.issueDescription],
+              ["Amount", selected.serviceAmount ? `Rs. ${selected.serviceAmount}` : "-"],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="grid grid-cols-3 gap-4 py-2 border-b border-gray-100"
+              >
+                <dt className="text-sm text-gray-500">{label}</dt>
+                <dd className="text-sm col-span-2 break-words">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </Modal>
 
       {/* Assign Technician Modal */}
       <Modal

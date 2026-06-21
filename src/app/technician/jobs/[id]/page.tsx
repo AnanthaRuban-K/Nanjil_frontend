@@ -37,7 +37,10 @@ export default function JobDetailPage() {
         `/technician/jobs/${params.id}/status`,
         { status }
       );
-      setJob(res.data.data);
+      setJob((current) => ({
+        ...res.data.data,
+        customer: current?.customer ?? res.data.data.customer,
+      }));
     } catch (err) {
       if (err instanceof AxiosError)
         setActionError(err.response?.data?.message || "Failed");
@@ -58,6 +61,9 @@ export default function JobDetailPage() {
 
   const rows = [
     ["Reference", job.bookingReference],
+    ["Customer", job.customer?.fullName ?? "-"],
+    ["Phone", job.customer?.phone ?? "-"],
+    ["Email", job.customer?.email ?? "-"],
     ["Service Type", job.serviceType],
     ["Scheduled Date", job.scheduledDate || job.preferredDate],
     ["Address", job.serviceAddress],
