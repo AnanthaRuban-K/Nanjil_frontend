@@ -10,6 +10,7 @@ import LandingHero from "@/components/LandingHero";
 import TrustSection from "@/components/TrustSection";
 import ServiceGrid from "@/components/ServiceGrid";
 import HowItWorks from "@/components/HowItWorks";
+import ProjectEnquiry from "@/components/ProjectEnquiry";
 import CallCTA from "@/components/CallCTA";
 import MobileStickyBar from "@/components/MobileStickyBar";
 import Image from "next/image";
@@ -72,6 +73,12 @@ export default function LandingPage() {
             >
               How It Works
             </a>
+            <a
+              href="#project-enquiry"
+              className="transition-colors hover:text-[#0F2F6B]"
+            >
+              Project Work
+            </a>
           </nav>
 
           {/* Auth buttons */}
@@ -97,6 +104,9 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <HowItWorks />
+
+      {/* Project Enquiry */}
+      <ProjectEnquiry />
 
       {/* CTA */}
       <CallCTA />
@@ -140,6 +150,14 @@ export default function LandingPage() {
                     className="transition-colors hover:text-[#3CC3D6]"
                   >
                     How It Works
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#project-enquiry"
+                    className="transition-colors hover:text-[#3CC3D6]"
+                  >
+                    Project Work
                   </a>
                 </li>
                 <li>

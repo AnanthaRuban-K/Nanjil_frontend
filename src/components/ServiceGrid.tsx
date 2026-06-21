@@ -8,6 +8,7 @@ import {
   Wrench,
   Settings,
   Droplet,
+  Building2,
 } from "lucide-react";
 
 const services = [
@@ -45,6 +46,11 @@ const services = [
     icon: Droplet,
     title: "Water Tank Overflow Fix",
     desc: "Float valve repair, overflow pipe fix, and tank automation setup.",
+  },
+  {
+    icon: Building2,
+    title: "New Building MEP Work",
+    desc: "Complete electrical and plumbing work for new houses, offices, shops, and buildings.",
   },
 ];
 

@@ -1,24 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { api, type Booking, type Payment } from "@/lib/api";
 import { CONTACT_CONFIG } from "@/config/contact";
-import Link from "next/link";
 import {
   ArrowLeft,
   CalendarDays,
-  MapPin,
-  FileText,
+  CheckCircle2,
   Clock,
   CreditCard,
+  FileText,
   Hash,
+  IndianRupee,
+  Loader2,
+  MapPin,
+  QrCode,
+  ReceiptText,
+  ShieldCheck,
   Wrench,
 } from "lucide-react";
 
 export default function BookingDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [receipt, setReceipt] = useState<Payment | null>(null);
   const [error, setError] = useState("");
@@ -47,25 +53,21 @@ export default function BookingDetailPage() {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "PENDING":
-        return "bg-yellow-100 text-yellow-700";
-      case "CONFIRMED":
-        return "bg-blue-100 text-blue-700";
-      case "IN_PROGRESS":
-        return "bg-indigo-100 text-indigo-700";
-      case "COMPLETED":
-        return "bg-green-100 text-green-700";
-      case "CANCELLED":
-        return "bg-red-100 text-red-700";
-      case "PAID":
-        return "bg-green-100 text-green-700";
       case "UNPAID":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-[#FFF4E2] text-[#B96000]";
+      case "CONFIRMED":
       case "PAYMENT_SUBMITTED":
-        return "bg-blue-100 text-blue-700";
+        return "bg-[#E7F8FC] text-[#0E7892]";
+      case "IN_PROGRESS":
+        return "bg-[#EAF0F8] text-[#12355B]";
+      case "COMPLETED":
+      case "PAID":
+        return "bg-emerald-50 text-emerald-700";
+      case "CANCELLED":
       case "PAYMENT_REJECTED":
         return "bg-red-100 text-red-700";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700";
     }
   };
 
@@ -114,89 +116,90 @@ export default function BookingDetailPage() {
     }
   };
 
-  if (error)
+  if (error) {
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-0">
+      <div className="mx-auto max-w-2xl">
         <Link
           href="/bookings"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-6 transition-colors"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#12355B]"
         >
-          <ArrowLeft size={15} />
-          Back to Bookings
+          <ArrowLeft size={16} />
+          Back to bookings
         </Link>
-        <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
-          <p className="text-gray-500">{error}</p>
+        <div className="rounded-lg border border-[#D7E4EE] bg-white px-5 py-12 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-[#E7F8FC]">
+            <Wrench size={26} className="text-[#0E7892]" />
+          </div>
+          <h1 className="font-semibold text-[#12355B]">{error}</h1>
           <Link href="/bookings">
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button className="mt-5 rounded-lg border border-[#D7E4EE] px-4 py-2.5 text-sm font-semibold text-[#12355B] hover:bg-[#F4F8FB]">
               Go back
             </button>
           </Link>
         </div>
       </div>
     );
+  }
 
-  if (loading)
+  if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 sm:px-0">
-        <div className="h-5 w-32 bg-gray-100 rounded mb-6 animate-pulse" />
-        <div className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6 space-y-5">
-          <div className="flex items-center justify-between">
-            <div className="h-6 w-40 bg-gray-100 rounded animate-pulse" />
-            <div className="flex gap-2">
-              <div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse" />
-              <div className="h-6 w-20 bg-gray-100 rounded-full animate-pulse" />
+      <div className="mx-auto max-w-6xl space-y-4">
+        <div className="h-9 w-32 animate-pulse rounded-lg bg-slate-100" />
+        <div className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm">
+          <div className="h-7 w-44 animate-pulse rounded bg-slate-100" />
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_320px]">
+            <div className="space-y-4">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="h-12 animate-pulse rounded bg-slate-50" />
+              ))}
             </div>
+            <div className="h-52 animate-pulse rounded bg-slate-50" />
           </div>
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse space-y-1.5">
-              <div className="h-3 w-24 bg-gray-50 rounded" />
-              <div className="h-4 w-2/3 bg-gray-100 rounded" />
-            </div>
-          ))}
         </div>
       </div>
     );
+  }
 
   if (!booking) return null;
 
   const details = [
     {
-      icon: <Hash size={15} />,
+      icon: Hash,
       label: "Reference",
       value: booking.bookingReference,
     },
     {
-      icon: <Wrench size={15} />,
+      icon: Wrench,
       label: "Service Type",
       value: booking.serviceType,
     },
     {
-      icon: <CalendarDays size={15} />,
+      icon: CalendarDays,
       label: "Preferred Date",
       value: formatDate(booking.preferredDate),
     },
     {
-      icon: <CalendarDays size={15} />,
+      icon: CalendarDays,
       label: "Scheduled Date",
       value: booking.scheduledDate ? formatDate(booking.scheduledDate) : "-",
     },
     {
-      icon: <MapPin size={15} />,
+      icon: MapPin,
       label: "Service Address",
       value: booking.serviceAddress,
     },
     {
-      icon: <FileText size={15} />,
+      icon: FileText,
       label: "Issue Description",
       value: booking.issueDescription,
     },
     {
-      icon: <Clock size={15} />,
+      icon: Clock,
       label: "Created",
       value: formatDateTime(booking.createdAt),
     },
     {
-      icon: <CreditCard size={15} />,
+      icon: IndianRupee,
       label: "Service Amount",
       value: booking.serviceAmount ? `Rs. ${booking.serviceAmount}` : "-",
     },
@@ -213,70 +216,132 @@ export default function BookingDetailPage() {
   )}`;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-0">
-      {/* Back Link */}
+    <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
       <Link
         href="/bookings"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4 transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#12355B]"
       >
-        <ArrowLeft size={15} />
-        Back to Bookings
+        <ArrowLeft size={16} />
+        Back to bookings
       </Link>
 
-      {/* Main Card */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-5 border-b border-gray-100">
-          <h1 className="text-lg font-bold text-gray-900">Booking Details</h1>
-          <div className="flex items-center gap-2">
+      <section className="rounded-lg bg-[#0F2F57] p-5 text-white shadow-xl shadow-[#0F2F57]/10 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-[#9BE7F6]">
+              <ShieldCheck size={14} />
+              Booking detail
+            </div>
+            <h1 className="text-2xl font-bold sm:text-3xl">
+              {booking.serviceType}
+            </h1>
+            <p className="mt-2 text-sm text-white/70">
+              {booking.bookingReference}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(booking.status)}`}
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusStyle(booking.status)}`}
             >
               <Clock size={12} />
               {booking.status.replace("_", " ")}
             </span>
             <span
-              className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(booking.paymentStatus)}`}
+              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusStyle(booking.paymentStatus)}`}
             >
               <CreditCard size={12} />
-              {booking.paymentStatus}
+              {booking.paymentStatus.replace("_", " ")}
             </span>
           </div>
         </div>
+      </section>
 
-        {/* Details */}
-        <div className="px-5 sm:px-6 py-5 space-y-4">
-          {details.map(({ icon, label, value }) => (
-            <div
-              key={label}
-              className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
-            >
-              <div className="flex items-center gap-2 sm:w-40 shrink-0">
-                <span className="text-gray-400">{icon}</span>
-                <span className="text-sm text-gray-500">{label}</span>
+      <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
+        <section className="overflow-hidden rounded-lg border border-[#D7E4EE] bg-white shadow-sm">
+          <div className="border-b border-[#E7EEF5] p-4 sm:p-5">
+            <h2 className="font-semibold text-[#12355B]">Service Details</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Track your service request and scheduled visit details.
+            </p>
+          </div>
+
+          <div className="divide-y divide-[#EEF3F7]">
+            {details.map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="grid gap-2 p-4 sm:grid-cols-[180px_1fr] sm:gap-4 sm:p-5"
+              >
+                <div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+                  <Icon size={16} className="text-[#0E7892]" />
+                  {label}
+                </div>
+                <p className="break-words text-sm leading-6 text-[#12355B]">
+                  {value}
+                </p>
               </div>
-              <p className="text-sm text-gray-900 sm:pl-0 pl-7">{value}</p>
+            ))}
+          </div>
+        </section>
+
+        <aside className="space-y-4">
+          <div className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#E7F8FC]">
+              <CreditCard size={20} className="text-[#0E7892]" />
             </div>
-          ))}
-        </div>
+            <h2 className="mt-4 font-semibold text-[#12355B]">Payment Status</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              {booking.paymentStatus === "PAID"
+                ? "Your payment has been verified."
+                : booking.paymentStatus === "PAYMENT_SUBMITTED"
+                  ? "Your payment is waiting for admin verification."
+                  : booking.status === "COMPLETED"
+                    ? "Payment can be submitted after service completion."
+                    : "Payment details will appear after service completion."}
+            </p>
+            <div className="mt-4 rounded-lg bg-[#F8FBFD] p-3 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-slate-500">Amount</span>
+                <span className="font-semibold text-[#12355B]">
+                  {booking.serviceAmount ? `Rs. ${booking.serviceAmount}` : "-"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {booking.paymentStatus === "PAYMENT_SUBMITTED" && (
+            <div className="rounded-lg border border-[#BFEAF3] bg-[#E7F8FC] p-4 text-sm text-[#0E7892]">
+              Payment submitted for admin verification
+              {booking.submittedUpiReference
+                ? `: ${booking.submittedUpiReference}`
+                : "."}
+            </div>
+          )}
+        </aside>
       </div>
 
       {canSubmitUpiPayment && (
-        <div className="mt-4 bg-white rounded-xl border border-gray-200 p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-5">
-            <div className="shrink-0">
-              <img
+        <section className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm sm:p-6">
+          <div className="grid gap-5 md:grid-cols-[220px_1fr]">
+            <div>
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#FFF4E2] px-3 py-1 text-xs font-semibold text-[#B96000]">
+                <QrCode size={14} />
+                UPI Payment
+              </div>
+              <Image
                 src={qrUrl}
                 alt="UPI QR code"
-                className="h-[180px] w-[180px] rounded-lg border border-gray-200"
+                width={180}
+                height={180}
+                className="h-[180px] w-[180px] rounded-lg border border-[#D7E4EE]"
+                unoptimized
               />
             </div>
-            <div className="flex-1 space-y-3">
+            <div className="space-y-3">
               <div>
-                <h2 className="text-base font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-[#12355B]">
                   Scan & Pay
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-slate-500">
                   UPI ID: {CONTACT_CONFIG.upiId}
                 </p>
               </div>
@@ -290,7 +355,7 @@ export default function BookingDetailPage() {
                 value={upiReference}
                 onChange={(e) => setUpiReference(e.target.value)}
                 placeholder="Enter UPI transaction reference"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="h-11 w-full rounded-lg border border-[#D7E4EE] px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#37B8D8] focus:ring-2 focus:ring-[#37B8D8]/20"
               />
               {paymentError && (
                 <p className="text-sm text-red-600">{paymentError}</p>
@@ -298,63 +363,47 @@ export default function BookingDetailPage() {
               <button
                 onClick={submitPaymentReference}
                 disabled={!upiReference.trim() || paymentLoading}
-                className="w-full rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#F7941D] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#e8820f] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
               >
+                {paymentLoading && <Loader2 size={16} className="animate-spin" />}
                 {paymentLoading ? "Submitting..." : "I Have Paid"}
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {booking.paymentStatus === "PAYMENT_SUBMITTED" && (
-        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
-          Payment submitted for admin verification
-          {booking.submittedUpiReference
-            ? `: ${booking.submittedUpiReference}`
-            : "."}
-        </div>
+        </section>
       )}
 
       {receipt && (
-        <div className="mt-4 bg-white rounded-xl border border-gray-200">
-          <div className="border-b border-gray-100 px-5 py-4">
-            <h2 className="text-base font-semibold text-gray-900">Receipt</h2>
+        <section className="overflow-hidden rounded-lg border border-[#D7E4EE] bg-white shadow-sm">
+          <div className="border-b border-[#E7EEF5] p-4 sm:p-5">
+            <div className="flex items-center gap-2">
+              <ReceiptText size={18} className="text-[#0E7892]" />
+              <h2 className="font-semibold text-[#12355B]">Receipt</h2>
+            </div>
           </div>
-          <div className="px-5 py-5 space-y-3 text-sm">
-            <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Invoice Number</span>
-              <span className="font-medium text-gray-900">
-                {receipt.invoiceNumber}
-              </span>
-            </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Amount</span>
-              <span className="font-medium text-gray-900">
-                Rs. {receipt.amount}
-              </span>
-            </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Payment Mode</span>
-              <span className="font-medium text-gray-900">
-                {receipt.paymentMode}
-              </span>
-            </div>
-            {receipt.upiReference && (
-              <div className="flex justify-between gap-4">
-                <span className="text-gray-500">UPI Reference</span>
-                <span className="font-medium text-gray-900">
-                  {receipt.upiReference}
-                </span>
+          <div className="grid gap-3 p-4 text-sm sm:grid-cols-2 sm:p-5">
+            {[
+              ["Invoice Number", receipt.invoiceNumber],
+              ["Amount", `Rs. ${receipt.amount}`],
+              ["Payment Mode", receipt.paymentMode],
+              ["UPI Reference", receipt.upiReference || "-"],
+              ["Paid Date", formatDate(receipt.paymentDate)],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg bg-[#F8FBFD] p-3">
+                <p className="text-xs font-medium text-slate-500">{label}</p>
+                <p className="mt-1 break-words font-semibold text-[#12355B]">
+                  {value}
+                </p>
               </div>
-            )}
-            <div className="flex justify-between gap-4">
-              <span className="text-gray-500">Paid Date</span>
-              <span className="font-medium text-gray-900">
-                {formatDate(receipt.paymentDate)}
-              </span>
-            </div>
+            ))}
           </div>
+        </section>
+      )}
+
+      {booking.paymentStatus === "PAID" && !receipt && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+          <CheckCircle2 size={16} className="mr-2 inline" />
+          Payment verified. Receipt is being prepared.
         </div>
       )}
     </div>

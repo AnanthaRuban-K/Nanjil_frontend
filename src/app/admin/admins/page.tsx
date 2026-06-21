@@ -1,21 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AxiosError } from "axios";
 import { api, type Technician as AdminUser } from "@/lib/api";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
-import { Table, Td, Th, Thead } from "@/components/ui/Table";
 import {
   Copy,
   Eye,
   EyeOff,
   KeyRound,
+  Phone,
   RefreshCw,
+  Search,
+  ShieldAlert,
   ShieldCheck,
+  UserCheck,
+  UserCog,
   UserPlus,
+  Users,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -25,9 +30,13 @@ export default function AdminAccountsPage() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<AdminUser | null>(null);
   const [error, setError] = useState("");
+  const [pageError, setPageError] = useState("");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState<{
     fullName: string;
     email: string;
@@ -41,14 +50,23 @@ export default function AdminAccountsPage() {
   });
 
   const load = async () => {
-    const res = await api.get("/admin/admins", {
-      params: { includeInactive: true },
-    });
-    setAdmins(res.data.data);
+    setPageError("");
+    setPageLoading(true);
+
+    try {
+      const res = await api.get("/admin/admins", {
+        params: { includeInactive: true },
+      });
+      setAdmins(res.data.data);
+    } catch {
+      setPageError("Unable to load admin accounts. Please try again.");
+    } finally {
+      setPageLoading(false);
+    }
   };
 
   useEffect(() => {
-    load().catch(() => undefined);
+    load();
   }, []);
 
   const reset = () => {
@@ -157,6 +175,48 @@ export default function AdminAccountsPage() {
     }
   };
 
+  const deleteAdmin = async (admin: AdminUser) => {
+    if (
+      !window.confirm(
+        `Delete ${admin.fullName}? This will remove their admin login access but keep audit/history data.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await api.patch(`/admin/admins/${admin.id}`, {
+        isActive: false,
+      });
+      load();
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        window.alert(err.response?.data?.message || "Failed");
+      } else {
+        window.alert("Something went wrong");
+      }
+    }
+  };
+
+  const filteredAdmins = useMemo(() => {
+    const text = search.trim().toLowerCase();
+    const visibleAdmins = showInactive
+      ? admins
+      : admins.filter((admin) => admin.isActive);
+
+    if (!text) return visibleAdmins;
+
+    return visibleAdmins.filter((admin) =>
+      [admin.fullName, admin.email, admin.phone, admin.isActive ? "active" : "inactive"]
+        .join(" ")
+        .toLowerCase()
+        .includes(text)
+    );
+  }, [admins, search, showInactive]);
+
+  const activeCount = admins.filter((admin) => admin.isActive).length;
+  const inactiveCount = admins.length - activeCount;
+
   const canSubmit =
     Boolean(form.fullName.trim()) &&
     Boolean(form.phone.trim()) &&
@@ -165,61 +225,272 @@ export default function AdminAccountsPage() {
       : Boolean(form.email.trim()) && form.password.length >= 8);
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Admin Accounts</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Create admins, update passwords, and control access.
-          </p>
+    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6">
+      <section className="rounded-lg bg-[#0F2F57] p-5 text-white shadow-xl shadow-[#0F2F57]/10 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-[#9BE7F6]">
+              <ShieldCheck size={14} />
+              Admin access control
+            </div>
+            <h1 className="text-2xl font-bold sm:text-3xl">Admin Accounts</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/70">
+              Create trusted admin accounts, update passwords, and control who
+              can manage bookings, technicians, payments, and reports.
+            </p>
+          </div>
+          <Button onClick={startCreate} className="w-full sm:w-auto">
+            <UserPlus size={16} />
+            Add Admin
+          </Button>
         </div>
-        <Button onClick={startCreate}>
-          <UserPlus size={16} />
-          Add Admin
-        </Button>
+      </section>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          {
+            label: "Total Admins",
+            value: admins.length,
+            icon: Users,
+            color: "bg-[#E7F8FC] text-[#0E7892]",
+          },
+          {
+            label: "Active",
+            value: activeCount,
+            icon: UserCheck,
+            color: "bg-emerald-50 text-emerald-600",
+          },
+          {
+            label: "Inactive",
+            value: inactiveCount,
+            icon: ShieldAlert,
+            color: "bg-[#FFF4E2] text-[#F7941D]",
+          },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <div
+            key={label}
+            className="rounded-lg border border-[#D7E4EE] bg-white p-4 shadow-sm"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-slate-500">{label}</p>
+                <p className="mt-1 text-2xl font-bold text-[#12355B]">
+                  {pageLoading ? "-" : value}
+                </p>
+              </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${color}`}>
+                <Icon size={18} />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <Table>
-        <Thead>
-          <tr>
-            <Th>Name</Th>
-            <Th>Email</Th>
-            <Th>Phone</Th>
-            <Th>Status</Th>
-            <Th className="text-right">Actions</Th>
-          </tr>
-        </Thead>
-        <tbody className="divide-y divide-gray-200">
-          {admins.map((admin) => (
-            <tr key={admin.id}>
-              <Td>{admin.fullName}</Td>
-              <Td>{admin.email}</Td>
-              <Td>{admin.phone}</Td>
-              <Td>
-                <Badge status={admin.isActive ? "ACTIVE" : "INACTIVE"} />
-              </Td>
-              <Td className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => startEdit(admin)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={admin.isActive ? "danger" : "primary"}
-                    onClick={() => toggleActive(admin)}
-                  >
-                    {admin.isActive ? "Deactivate" : "Activate"}
-                  </Button>
+      <section className="overflow-hidden rounded-lg border border-[#D7E4EE] bg-white shadow-sm">
+        <div className="flex flex-col gap-4 border-b border-[#E7EEF5] p-4 lg:flex-row lg:items-center lg:justify-between sm:p-5">
+          <div>
+            <h2 className="font-semibold text-[#12355B]">Admin Directory</h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Review privileged users and access status
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="h-4 w-4 rounded border-[#D7E4EE] text-[#0E7892] focus:ring-[#37B8D8]"
+              />
+              Show inactive
+            </label>
+            <div className="relative w-full sm:w-72">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search admin"
+                className="h-10 w-full rounded-lg border border-[#D7E4EE] bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#37B8D8] focus:ring-2 focus:ring-[#37B8D8]/20"
+              />
+            </div>
+          </div>
+        </div>
+
+        {pageError ? (
+          <div className="p-8 text-center">
+            <p className="text-sm text-red-600">{pageError}</p>
+            <button
+              onClick={load}
+              className="mt-4 rounded-lg border border-[#D7E4EE] px-4 py-2 text-sm font-semibold text-[#12355B] hover:bg-[#F4F8FB]"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : pageLoading ? (
+          <div className="space-y-3 p-4 sm:p-5">
+            {[...Array(4)].map((_, index) => (
+              <div
+                key={index}
+                className="flex animate-pulse items-center gap-3 rounded-lg border border-[#EEF3F7] p-4"
+              >
+                <div className="h-11 w-11 rounded-full bg-slate-100" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-1/3 rounded bg-slate-100" />
+                  <div className="h-3 w-1/2 rounded bg-slate-50" />
                 </div>
-              </Td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+              </div>
+            ))}
+          </div>
+        ) : admins.length === 0 ? (
+          <div className="px-5 py-14 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-[#E7F8FC]">
+              <UserPlus size={26} className="text-[#0E7892]" />
+            </div>
+            <h3 className="font-semibold text-[#12355B]">No admins yet</h3>
+            <p className="mx-auto mt-1 max-w-sm text-sm leading-6 text-slate-500">
+              Add an authorized admin account to manage the service platform.
+            </p>
+            <Button onClick={startCreate} className="mt-5">
+              <UserPlus size={16} />
+              Add Admin
+            </Button>
+          </div>
+        ) : filteredAdmins.length === 0 ? (
+          <div className="px-5 py-12 text-center">
+            <p className="font-semibold text-[#12355B]">No matching admins</p>
+            <p className="mt-1 text-sm text-slate-500">
+              Try another name, email, phone, or status.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="min-w-full divide-y divide-[#E7EEF5]">
+                <thead className="bg-[#F8FBFD]">
+                  <tr>
+                    {["Name", "Email", "Phone", "Status"].map((heading) => (
+                      <th
+                        key={heading}
+                        className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500"
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                    <th className="px-5 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EEF3F7]">
+                  {filteredAdmins.map((admin) => (
+                    <tr key={admin.id} className="transition-colors hover:bg-[#F8FBFD]">
+                      <td className="px-5 py-4 text-sm font-semibold text-[#12355B]">
+                        {admin.fullName}
+                      </td>
+                      <td className="px-5 py-4 text-sm text-slate-700">
+                        {admin.email}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm">
+                        <a
+                          href={`tel:${admin.phone}`}
+                          className="font-medium text-[#0E7892] hover:text-[#12355B]"
+                        >
+                          {admin.phone}
+                        </a>
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4">
+                        <Badge status={admin.isActive ? "ACTIVE" : "INACTIVE"} />
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => startEdit(admin)}
+                          >
+                            Edit
+                          </Button>
+                          {admin.isActive ? (
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => deleteAdmin(admin)}
+                            >
+                              Delete
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="primary"
+                              onClick={() => toggleActive(admin)}
+                            >
+                              Activate
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="divide-y divide-[#EEF3F7] lg:hidden">
+              {filteredAdmins.map((admin) => (
+                <article key={admin.id} className="p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-[#12355B]">
+                        {admin.fullName}
+                      </p>
+                      <p className="mt-1 break-words text-sm text-slate-500">
+                        {admin.email}
+                      </p>
+                    </div>
+                    <Badge status={admin.isActive ? "ACTIVE" : "INACTIVE"} />
+                  </div>
+                  <a
+                    href={`tel:${admin.phone}`}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#0E7892]"
+                  >
+                    <Phone size={15} />
+                    {admin.phone}
+                  </a>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => startEdit(admin)}
+                    >
+                      Edit
+                    </Button>
+                    {admin.isActive ? (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => deleteAdmin(admin)}
+                      >
+                        Delete
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => toggleActive(admin)}
+                      >
+                        Activate
+                      </Button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
 
       <Modal
         open={open}
@@ -233,18 +504,18 @@ export default function AdminAccountsPage() {
               authorized person.
             </div>
 
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm">
+            <div className="rounded-lg border border-[#D7E4EE] bg-[#F8FBFD] p-4 text-sm">
               <div className="grid grid-cols-[90px_1fr] gap-y-2">
                 <span className="text-gray-500">Name</span>
                 <span className="font-medium text-gray-900">
                   {createdCredentials.fullName}
                 </span>
                 <span className="text-gray-500">Email</span>
-                <span className="font-medium text-gray-900">
+                <span className="break-words font-medium text-gray-900">
                   {createdCredentials.email}
                 </span>
                 <span className="text-gray-500">Password</span>
-                <span className="font-medium text-gray-900">
+                <span className="break-words font-medium text-gray-900">
                   {createdCredentials.password}
                 </span>
               </div>
@@ -301,7 +572,7 @@ export default function AdminAccountsPage() {
                     <button
                       type="button"
                       onClick={generatePassword}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-[#0E7892] hover:text-[#12355B]"
                     >
                       <RefreshCw size={13} />
                       Generate
@@ -321,7 +592,7 @@ export default function AdminAccountsPage() {
                         ? "Leave blank to keep current password"
                         : "Min 8 characters"
                     }
-                    className="w-full rounded-lg border border-gray-300 px-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full rounded-lg border border-[#D7E4EE] px-9 py-2 text-sm outline-none focus:border-[#37B8D8] focus:ring-2 focus:ring-[#37B8D8]/20"
                     onChange={(e) =>
                       setForm({ ...form, password: e.target.value })
                     }
@@ -347,7 +618,7 @@ export default function AdminAccountsPage() {
                 onClick={submit}
                 disabled={!canSubmit}
               >
-                <ShieldCheck size={16} />
+                <UserCog size={16} />
                 {selected ? "Save Changes" : "Create Admin"}
               </Button>
             </div>
