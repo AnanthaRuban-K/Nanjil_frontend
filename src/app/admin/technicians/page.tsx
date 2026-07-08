@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserCheck,
   UserCog,
   UserPlus,
@@ -23,6 +24,8 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+type StatusFilter = "ACTIVE" | "INACTIVE" | "ALL";
 
 export default function AdminTechniciansPage() {
   const [technicians, setTechnicians] = useState<Technician[]>([]);
@@ -35,7 +38,7 @@ export default function AdminTechniciansPage() {
   const [pageLoading, setPageLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [search, setSearch] = useState("");
-  const [showInactive, setShowInactive] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("ACTIVE");
   const [createdCredentials, setCreatedCredentials] = useState<{
     fullName: string;
     email: string;
@@ -177,16 +180,14 @@ export default function AdminTechniciansPage() {
   const deleteTechnician = async (tech: Technician) => {
     if (
       !window.confirm(
-        `Delete ${tech.fullName}? This will remove their login access but keep past booking history.`
+        `Permanently delete ${tech.fullName}? If this technician has booking history, delete will be blocked and you can deactivate instead.`
       )
     ) {
       return;
     }
 
     try {
-      await api.patch(`/admin/technicians/${tech.id}`, {
-        isActive: false,
-      });
+      await api.delete(`/admin/technicians/${tech.id}`);
       load();
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -199,9 +200,12 @@ export default function AdminTechniciansPage() {
 
   const filteredTechnicians = useMemo(() => {
     const text = search.trim().toLowerCase();
-    const visibleTechnicians = showInactive
-      ? technicians
-      : technicians.filter((tech) => tech.isActive);
+    const visibleTechnicians =
+      statusFilter === "ALL"
+        ? technicians
+        : technicians.filter((tech) =>
+            statusFilter === "ACTIVE" ? tech.isActive : !tech.isActive
+          );
 
     if (!text) return visibleTechnicians;
 
@@ -211,7 +215,7 @@ export default function AdminTechniciansPage() {
         .toLowerCase()
         .includes(text)
     );
-  }, [search, showInactive, technicians]);
+  }, [search, statusFilter, technicians]);
 
   const activeCount = technicians.filter((tech) => tech.isActive).length;
   const inactiveCount = technicians.length - activeCount;
@@ -294,15 +298,26 @@ export default function AdminTechniciansPage() {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-600">
-              <input
-                type="checkbox"
-                checked={showInactive}
-                onChange={(e) => setShowInactive(e.target.checked)}
-                className="h-4 w-4 rounded border-[#D7E4EE] text-[#0E7892] focus:ring-[#37B8D8]"
-              />
-              Show inactive
-            </label>
+            <div className="inline-flex rounded-lg border border-[#D7E4EE] bg-[#F8FBFD] p-1">
+              {[
+                { value: "ACTIVE", label: "Active" },
+                { value: "INACTIVE", label: "Inactive" },
+                { value: "ALL", label: "All" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setStatusFilter(option.value as StatusFilter)}
+                  className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                    statusFilter === option.value
+                      ? "bg-white text-[#12355B] shadow-sm"
+                      : "text-slate-500 hover:text-[#12355B]"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
             <div className="relative w-full sm:w-72">
               <Search
                 size={16}
@@ -414,23 +429,21 @@ export default function AdminTechniciansPage() {
                           >
                             Edit
                           </Button>
-                          {tech.isActive ? (
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              onClick={() => deleteTechnician(tech)}
-                            >
-                              Delete
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="primary"
-                              onClick={() => toggleActive(tech)}
-                            >
-                              Activate
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant={tech.isActive ? "secondary" : "primary"}
+                            onClick={() => toggleActive(tech)}
+                          >
+                            {tech.isActive ? "Deactivate" : "Activate"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => deleteTechnician(tech)}
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -468,23 +481,21 @@ export default function AdminTechniciansPage() {
                     >
                       Edit
                     </Button>
-                    {tech.isActive ? (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => deleteTechnician(tech)}
-                      >
-                        Delete
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => toggleActive(tech)}
-                      >
-                        Activate
-                      </Button>
-                    )}
+                    <Button
+                      size="sm"
+                      variant={tech.isActive ? "secondary" : "primary"}
+                      onClick={() => toggleActive(tech)}
+                    >
+                      {tech.isActive ? "Deactivate" : "Activate"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => deleteTechnician(tech)}
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </Button>
                   </div>
                 </article>
               ))}
