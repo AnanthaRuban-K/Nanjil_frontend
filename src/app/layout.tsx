@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Nanjil MEP Service",
   description: "Local Electrical & Plumbing Booking System",
+  icons: {
+    icon: "/Nanjil.png",
+    shortcut: "/Nanjil.png",
+    apple: "/Nanjil.png",
+  },
 };
 
 export default function RootLayout({
