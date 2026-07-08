@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock,
   CreditCard,
+  CalendarClock,
   FileText,
   Hash,
   IndianRupee,
@@ -32,6 +33,12 @@ export default function BookingDetailPage() {
   const [upiReference, setUpiReference] = useState("");
   const [paymentError, setPaymentError] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
+  const [requestType, setRequestType] = useState<"CANCEL" | "RESCHEDULE">("RESCHEDULE");
+  const [requestedDate, setRequestedDate] = useState("");
+  const [requestNote, setRequestNote] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [requestSuccess, setRequestSuccess] = useState("");
+  const [requestLoading, setRequestLoading] = useState(false);
 
   useEffect(() => {
     api
@@ -113,6 +120,40 @@ export default function BookingDetailPage() {
       setPaymentError("Unable to submit payment reference");
     } finally {
       setPaymentLoading(false);
+    }
+  };
+
+  const submitBookingRequest = async () => {
+    if (!booking) return;
+
+    setRequestError("");
+    setRequestSuccess("");
+
+    if (requestType === "RESCHEDULE" && !requestedDate) {
+      setRequestError("Please choose a new preferred date.");
+      return;
+    }
+
+    setRequestLoading(true);
+
+    try {
+      const res = await api.post(`/bookings/my/${booking.id}/request`, {
+        type: requestType,
+        ...(requestType === "RESCHEDULE" ? { requestedDate } : {}),
+        ...(requestNote.trim() ? { note: requestNote.trim() } : {}),
+      });
+      setBooking(res.data.data);
+      setRequestSuccess(
+        requestType === "RESCHEDULE"
+          ? "Reschedule request sent to admin."
+          : "Cancel request sent to admin."
+      );
+      setRequestedDate("");
+      setRequestNote("");
+    } catch {
+      setRequestError("Unable to send request. Please try again.");
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -208,6 +249,9 @@ export default function BookingDetailPage() {
   const canSubmitUpiPayment =
     booking.status === "COMPLETED" &&
     ["UNPAID", "PAYMENT_REJECTED"].includes(booking.paymentStatus);
+  const canRequestChange =
+    booking.status !== "COMPLETED" && booking.status !== "CANCELLED";
+  const today = new Date().toISOString().slice(0, 10);
   const upiUrl = `upi://pay?pa=${encodeURIComponent(
     CONTACT_CONFIG.upiId
   )}&pn=${encodeURIComponent(CONTACT_CONFIG.upiName)}&cu=INR`;
@@ -318,6 +362,117 @@ export default function BookingDetailPage() {
           )}
         </aside>
       </div>
+
+      {canRequestChange && (
+        <section className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm sm:p-6">
+          <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+            <div>
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#E7F8FC]">
+                <CalendarClock size={20} className="text-[#0E7892]" />
+              </div>
+              <h2 className="mt-4 font-semibold text-[#12355B]">
+                Change Request
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">
+                Send a cancel or reschedule request to admin for this booking.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="inline-flex rounded-lg border border-[#D7E4EE] bg-[#F8FBFD] p-1">
+                {[
+                  { value: "RESCHEDULE", label: "Reschedule" },
+                  { value: "CANCEL", label: "Cancel" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setRequestType(option.value as "CANCEL" | "RESCHEDULE");
+                      setRequestError("");
+                      setRequestSuccess("");
+                    }}
+                    className={`rounded-md px-3 py-1.5 text-xs font-semibold transition ${
+                      requestType === option.value
+                        ? "bg-white text-[#12355B] shadow-sm"
+                        : "text-slate-500 hover:text-[#12355B]"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              {requestType === "RESCHEDULE" && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-slate-700">
+                    New preferred date
+                  </label>
+                  <input
+                    type="date"
+                    min={today}
+                    value={requestedDate}
+                    onChange={(e) => setRequestedDate(e.target.value)}
+                    className="h-11 w-full rounded-lg border border-[#D7E4EE] px-3 text-sm outline-none transition focus:border-[#37B8D8] focus:ring-2 focus:ring-[#37B8D8]/20 sm:max-w-xs"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Note {requestType === "CANCEL" ? "(reason)" : "(optional)"}
+                </label>
+                <textarea
+                  value={requestNote}
+                  onChange={(e) => setRequestNote(e.target.value)}
+                  maxLength={500}
+                  rows={4}
+                  placeholder={
+                    requestType === "CANCEL"
+                      ? "Tell us why you want to cancel"
+                      : "Add timing preference or any extra details"
+                  }
+                  className="w-full rounded-lg border border-[#D7E4EE] px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-[#37B8D8] focus:ring-2 focus:ring-[#37B8D8]/20"
+                />
+              </div>
+
+              {requestError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  {requestError}
+                </div>
+              )}
+              {requestSuccess && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+                  {requestSuccess}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={submitBookingRequest}
+                disabled={
+                  requestLoading ||
+                  (requestType === "RESCHEDULE" && !requestedDate)
+                }
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#F7941D] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#e8820f] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
+              >
+                {requestLoading && <Loader2 size={16} className="animate-spin" />}
+                {requestLoading
+                  ? "Sending..."
+                  : requestType === "RESCHEDULE"
+                    ? "Send Reschedule Request"
+                    : "Send Cancel Request"}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {!canRequestChange && (
+        <div className="rounded-lg border border-[#D7E4EE] bg-[#F8FBFD] p-4 text-sm text-slate-600">
+          Cancel and reschedule requests are closed for this booking.
+        </div>
+      )}
 
       {canSubmitUpiPayment && (
         <section className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm sm:p-6">
