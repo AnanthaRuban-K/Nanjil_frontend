@@ -116,14 +116,26 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
+const PUBLIC_AUTH_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/me",
+];
+
+function isPublicAuthRequest(url?: string) {
+  return !!url && PUBLIC_AUTH_PATHS.some((path) => url.includes(path));
+}
+
+// Handle expired sessions globally, but let public auth screens show their own errors.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (
       error.response?.status === 401 &&
       typeof window !== "undefined" &&
-      !error.config?.url?.includes("/auth/me")
+      !isPublicAuthRequest(error.config?.url)
     ) {
       window.location.href = "/login";
     }

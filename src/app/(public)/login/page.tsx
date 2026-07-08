@@ -14,6 +14,7 @@ import {
   Lock,
   Eye,
   EyeOff,
+  AlertCircle,
   Zap,
   Droplets,
   Wrench,
@@ -23,11 +24,32 @@ import {
 import { AxiosError } from "axios";
 
 const schema = z.object({
-  email: z.string().email("Invalid email"),
+  email: z.string().trim().email("Enter a valid email address").toLowerCase(),
   password: z.string().min(1, "Password is required"),
 });
 
 type FormData = z.infer<typeof schema>;
+type ApiErrorBody = { message?: string };
+
+function getLoginErrorMessage(err: unknown) {
+  if (!(err instanceof AxiosError)) {
+    return "Something went wrong. Please try again.";
+  }
+
+  if (!err.response) {
+    return "Unable to reach the server. Check your internet connection and try again.";
+  }
+
+  const status = err.response.status;
+  const message = (err.response.data as ApiErrorBody | undefined)?.message;
+
+  if (status === 401) return "Invalid email or password.";
+  if (status === 403) return message || "This account is inactive. Please contact admin.";
+  if (status === 422) return "Please enter a valid email and password.";
+  if (status === 429) return message || "Too many login attempts. Please wait and try again.";
+
+  return message || "Login failed. Please try again.";
+}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -39,6 +61,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
+    setFocus,
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -47,13 +70,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const role = await login(data.email, data.password);
-      router.push(getRoleRedirect(role));
+      router.replace(getRoleRedirect(role));
     } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data?.message || "Login failed");
-      } else {
-        setError("Something went wrong");
-      }
+      setError(getLoginErrorMessage(err));
+      setFocus("password");
     } finally {
       setLoading(false);
     }
@@ -171,14 +191,18 @@ export default function LoginPage() {
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-3 p-3.5 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600">
-              <div className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
-              {error}
+            <div
+              role="alert"
+              aria-live="polite"
+              className="flex items-start gap-3 p-3.5 bg-red-50 border border-red-100 rounded-xl text-sm text-red-700"
+            >
+              <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
+              <span>{error}</span>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-gray-700">Email</label>
               <div className="relative">
@@ -186,6 +210,8 @@ export default function LoginPage() {
                 <input
                   type="email"
                   placeholder="you@example.com"
+                  autoComplete="email"
+                  aria-invalid={!!errors.email}
                   className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
                     focus:ring-2 focus:ring-[#37B8D8]/20 focus:border-[#37B8D8]
                     ${errors.email ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
@@ -207,6 +233,8 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
+                  autoComplete="current-password"
+                  aria-invalid={!!errors.password}
                   className={`w-full h-12 pl-11 pr-12 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
                     focus:ring-2 focus:ring-[#37B8D8]/20 focus:border-[#37B8D8]
                     ${errors.password ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
