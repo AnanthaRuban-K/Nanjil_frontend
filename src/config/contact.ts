@@ -8,8 +8,10 @@ export const CONTACT_CONFIG = {
     "https://wa.me/918428489046?text=Hi%2C%20I%20need%20a%20service%20booking%20from%20Nanjil%20MEP%20Service.",
   callUrl: "tel:+918428489046",
   bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || "/bookings/new",
-  upiId: process.env.NEXT_PUBLIC_UPI_ID || "nanjilmep@upi",
-  upiName: process.env.NEXT_PUBLIC_UPI_NAME || "Nanjil MEP Service",
+  upiId: process.env.NEXT_PUBLIC_UPI_ID || "rethna1979@oksbi",
+  upiName:
+    process.env.NEXT_PUBLIC_UPI_NAME || "Thangarethinam Thangarethinam",
+  upiQrImage: "/upi-payment-qr.jpeg",
   companyName: "Nanjil MEP Service",
   serviceArea: "Nagercoil",
 };

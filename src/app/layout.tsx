@@ -5,6 +5,10 @@ import { AuthProvider } from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// Strict nonce-based CSP requires request-time rendering so Next.js can attach
+// the per-request nonce to its framework and hydration scripts.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Nanjil MEP Service",
   description: "Local Electrical & Plumbing Booking System",

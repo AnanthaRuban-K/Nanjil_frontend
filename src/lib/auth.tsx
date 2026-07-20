@@ -11,19 +11,9 @@ import {
 import { useRouter } from "next/navigation";
 import { api, type AuthUser } from "./api";
 
-// Token helpers
-interface TokenPayload {
-  sub: string;
-  role: string;
-  email: string;
-  is_active: boolean;
-  exp: number;
-}
-
 // Context shape
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<string>;
   register: (data: {
@@ -57,7 +47,6 @@ export function getRoleRedirect(role: string): string {
 // Provider
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -74,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.post("/auth/login", { email, password });
       const { user: u } = res.data.data;
 
-      setToken(null);
       setUser(u);
 
       return u.role;
@@ -92,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await api.post("/auth/register", data);
       const { user: u } = res.data.data;
 
-      setToken(null);
       setUser(u);
     },
     []
@@ -105,15 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Local logout should still work if the API is offline or the request is interrupted.
     }
 
-    setToken(null);
     setUser(null);
     router.replace("/login");
   }, [router]);
 
   return (
-    <AuthContext.Provider
-      value={{ user, token, isLoading, login, register, logout }}
-    >
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

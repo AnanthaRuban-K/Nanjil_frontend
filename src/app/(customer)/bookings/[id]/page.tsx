@@ -252,13 +252,6 @@ export default function BookingDetailPage() {
   const canRequestChange =
     booking.status !== "COMPLETED" && booking.status !== "CANCELLED";
   const today = new Date().toISOString().slice(0, 10);
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(
-    CONTACT_CONFIG.upiId
-  )}&pn=${encodeURIComponent(CONTACT_CONFIG.upiName)}&cu=INR`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-    upiUrl
-  )}`;
-
   return (
     <div className="mx-auto max-w-6xl space-y-5 sm:space-y-6">
       <Link
@@ -476,20 +469,21 @@ export default function BookingDetailPage() {
 
       {canSubmitUpiPayment && (
         <section className="rounded-lg border border-[#D7E4EE] bg-white p-5 shadow-sm sm:p-6">
-          <div className="grid gap-5 md:grid-cols-[220px_1fr]">
+          <div className="grid gap-5 md:grid-cols-[300px_1fr] md:items-center">
             <div>
               <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-[#FFF4E2] px-3 py-1 text-xs font-semibold text-[#B96000]">
                 <QrCode size={14} />
                 UPI Payment
               </div>
-              <Image
-                src={qrUrl}
-                alt="UPI QR code"
-                width={180}
-                height={180}
-                className="h-[180px] w-[180px] rounded-lg border border-[#D7E4EE]"
-                unoptimized
-              />
+              <div className="relative aspect-[921/747] w-full max-w-[300px] overflow-hidden rounded-xl border border-[#D7E4EE] bg-[#F3F5FC] shadow-sm">
+                <Image
+                  src={CONTACT_CONFIG.upiQrImage}
+                  alt={`Scan to pay ${CONTACT_CONFIG.upiName} via UPI`}
+                  fill
+                  sizes="(max-width: 767px) 300px, 300px"
+                  className="object-cover object-center"
+                />
+              </div>
             </div>
             <div className="space-y-3">
               <div>
