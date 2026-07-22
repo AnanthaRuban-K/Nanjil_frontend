@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, type Booking } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { formatDate } from "@/lib/date";
 import {
   BookOpen,
   PlusCircle,
@@ -56,18 +57,6 @@ export default function CustomerDashboard() {
         return "bg-red-100 text-red-700";
       default:
         return "bg-slate-100 text-slate-700";
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
     }
   };
 

@@ -10,7 +10,7 @@ import { z } from "zod";
 import { useAuth, getRoleRedirect } from "@/lib/auth";
 import {
   ArrowRight,
-  Mail,
+  UserRound,
   Lock,
   Eye,
   EyeOff,
@@ -24,7 +24,21 @@ import {
 import { AxiosError } from "axios";
 
 const schema = z.object({
-  email: z.string().trim().email("Enter a valid email address").toLowerCase(),
+  identifier: z
+    .string()
+    .trim()
+    .min(1, "Email or phone number is required")
+    .transform((value) =>
+      value.includes("@")
+        ? value.toLowerCase()
+        : value.replace(/[\s()-]/g, "")
+    )
+    .refine(
+      (value) =>
+        z.string().email().safeParse(value).success ||
+        /^\+?[0-9]{10,15}$/.test(value),
+      "Enter a valid email or phone number"
+    ),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -43,9 +57,9 @@ function getLoginErrorMessage(err: unknown) {
   const status = err.response.status;
   const message = (err.response.data as ApiErrorBody | undefined)?.message;
 
-  if (status === 401) return "Invalid email or password.";
+  if (status === 401) return "Invalid email/phone or password.";
   if (status === 403) return message || "This account is inactive. Please contact admin.";
-  if (status === 422) return "Please enter a valid email and password.";
+  if (status === 422) return "Please enter a valid email/phone and password.";
   if (status === 429) return message || "Too many login attempts. Please wait and try again.";
 
   return message || "Login failed. Please try again.";
@@ -69,7 +83,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const role = await login(data.email, data.password);
+      const role = await login(data.identifier, data.password);
       router.replace(getRoleRedirect(role));
     } catch (err) {
       setError(getLoginErrorMessage(err));
@@ -204,21 +218,29 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-700">Email</label>
+              <label className="text-sm font-medium text-gray-700">
+                Email or phone number
+              </label>
               <div className="relative">
-                <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <UserRound size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
-                  type="email"
-                  placeholder="you@example.com"
-                  autoComplete="email"
-                  aria-invalid={!!errors.email}
+                  type="text"
+                  placeholder="Email or phone number"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  aria-invalid={!!errors.identifier}
                   className={`w-full h-12 pl-11 pr-4 rounded-xl border bg-white text-sm placeholder:text-gray-400 outline-none transition-all
                     focus:ring-2 focus:ring-[#37B8D8]/20 focus:border-[#37B8D8]
-                    ${errors.email ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
-                  {...register("email")}
+                    ${errors.identifier ? "border-red-300" : "border-gray-200 hover:border-gray-300"}`}
+                  {...register("identifier")}
                 />
               </div>
-              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+              {errors.identifier && (
+                <p className="text-xs text-red-500">
+                  {errors.identifier.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1.5">

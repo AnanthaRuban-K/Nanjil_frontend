@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { api, type Booking, type Payment } from "@/lib/api";
 import { CONTACT_CONFIG } from "@/config/contact";
+import { formatDate, formatDateTime } from "@/lib/date";
 import {
   ArrowLeft,
   CalendarDays,
@@ -75,32 +76,6 @@ export default function BookingDetailPage() {
         return "bg-red-100 text-red-700";
       default:
         return "bg-slate-100 text-slate-700";
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      });
-    } catch {
-      return dateStr;
     }
   };
 

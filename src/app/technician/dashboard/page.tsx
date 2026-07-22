@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api, type Booking } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { formatDate } from "@/lib/date";
 import { Badge } from "@/components/ui/Badge";
 import {
   ArrowRight,
@@ -20,20 +21,6 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return "-";
-
-  try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
 
 export default function TechnicianDashboard() {
   const { user } = useAuth();

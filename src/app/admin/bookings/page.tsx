@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { AxiosError } from "axios";
 import { api, type Booking, type Technician } from "@/lib/api";
+import { formatDate } from "@/lib/date";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
@@ -42,20 +43,6 @@ const PAYMENT_STATUS_OPTIONS = [
 const limit = 10;
 
 export const dynamic = "force-dynamic";
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return "-";
-
-  try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);

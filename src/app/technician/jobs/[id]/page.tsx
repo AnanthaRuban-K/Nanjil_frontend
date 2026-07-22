@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AxiosError } from "axios";
 import { api, type Booking } from "@/lib/api";
+import { formatDate, formatDateTime } from "@/lib/date";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import {
@@ -21,34 +22,6 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return "-";
-
-  try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function formatDateTime(dateStr: string) {
-  try {
-    return new Date(dateStr).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  } catch {
-    return dateStr;
-  }
-}
 
 export default function JobDetailPage() {
   const params = useParams();

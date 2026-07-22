@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api, type Booking } from "@/lib/api";
+import { formatDate } from "@/lib/date";
 import { Badge } from "@/components/ui/Badge";
 import { Pagination } from "@/components/ui/Pagination";
 import {
@@ -22,20 +23,6 @@ import {
 export const dynamic = "force-dynamic";
 
 const limit = 10;
-
-function formatDate(dateStr: string | null) {
-  if (!dateStr) return "-";
-
-  try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
 
 export default function TechnicianJobsPage() {
   const [jobs, setJobs] = useState<Booking[]>([]);
