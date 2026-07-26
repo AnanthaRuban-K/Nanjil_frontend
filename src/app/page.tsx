@@ -192,7 +192,7 @@ export default function LandingPage() {
 
           <div className="mt-10 border-t border-gray-700 pt-6 text-center text-sm">
             Copyright {new Date().getFullYear()} {CONTACT_CONFIG.companyName}. All
-            rights reserved.
+            rights reserved. Developed by SBros Tech Pvt Ltd.
           </div>
         </div>
       </footer>
